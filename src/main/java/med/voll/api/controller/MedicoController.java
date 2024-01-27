@@ -59,6 +59,11 @@ public class MedicoController {
         medicoRepository.deleteById(dados.id());
     }
 
-
+    @PatchMapping("/{id}")
+    @Transactional
+    public void desativar(@PathVariable Long id){
+        var medico = medicoRepository.getReferenceById(id);
+        medico.desativar();
+    }
 
 }
