@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +17,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.validation.Valid;
 import med.voll.api.medico.DadosCadastroMedico;
+import med.voll.api.medico.DadosDetalhamentoMedico;
 import med.voll.api.medico.DadosExcluirMedico;
 import med.voll.api.medico.DadosAtualizacaoMedico;
 import med.voll.api.medico.DadosListagemMedico;
@@ -34,36 +37,46 @@ public class MedicoController {
 
     @PostMapping
     @Transactional
-    public void cadastrar(@RequestBody @Valid DadosCadastroMedico dados){
+    public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroMedico dados, UriComponentsBuilder uriBuilder){
         System.out.println(dados);
-        medicoRepository.save(new Medico(dados));
+
+        var medico = medicoRepository.save(new Medico(dados));
+
+        var uri = uriBuilder.path("/medicos/{id}").buildAndExpand(medico.getId()).toUri();
+
+        return ResponseEntity.created(uri).body(new DadosDetalhamentoMedico(medico));
     }
 
     @GetMapping
-    public Page<DadosListagemMedico> listar(@PageableDefault(sort = "nome", direction = Direction.ASC, page = 0, size = 10) Pageable paginacao){
-        return medicoRepository.findAllByAtivoTrue(paginacao).map(DadosListagemMedico::new);
+    public ResponseEntity<Page<DadosListagemMedico>> listar(@PageableDefault(sort = "nome", direction = Direction.ASC, page = 0, size = 10) Pageable paginacao){
+        var page = medicoRepository.findAllByAtivoTrue(paginacao).map(DadosListagemMedico::new);
+        return ResponseEntity.ok(page);
     }
 
     @PutMapping
     @Transactional
-    public void alterar(@RequestBody @Valid DadosAtualizacaoMedico dados){
+    public ResponseEntity alterar(@RequestBody @Valid DadosAtualizacaoMedico dados){
         var medico = medicoRepository.getReferenceById(dados.id());
         medico.atualizarInformacoes(dados);
         //medicoRepository.save(medico); //produz o mesmo resultado @Transactional
         //medicoRepository.flush(); //produz o mesmo resultado @Transactional
+
+        return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void excluir(@ModelAttribute DadosExcluirMedico dados){
+    public ResponseEntity excluir(@ModelAttribute DadosExcluirMedico dados){
         medicoRepository.deleteById(dados.id());
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     @Transactional
-    public void desativar(@PathVariable Long id){
+    public ResponseEntity desativar(@PathVariable Long id){
         var medico = medicoRepository.getReferenceById(id);
         medico.desativar();
+        return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
 
 }
