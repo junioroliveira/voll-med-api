@@ -31,7 +31,7 @@ public class PacienteController {
     PacienteRepository pacienteRepository;
     
     @PostMapping
-    public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroPaciente dados, UriComponentsBuilder uriBuilder){
+    public ResponseEntity<DadosDetalhamentoPaciente> cadastrar(@RequestBody @Valid DadosCadastroPaciente dados, UriComponentsBuilder uriBuilder){
         System.out.println(dados);
         var paciente = pacienteRepository.save(new Paciente(dados));
 
@@ -48,14 +48,14 @@ public class PacienteController {
 
     @PatchMapping("/{id}")
     @Transactional
-    public ResponseEntity desativar(@PathVariable Long id){
+    public ResponseEntity<DadosDetalhamentoPaciente> desativar(@PathVariable Long id){
         var paciente = pacienteRepository.getReferenceById(id);
         paciente.desativar();
         return ResponseEntity.ok(new DadosDetalhamentoPaciente(paciente));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity detalhar(@PathVariable Long id) {
+    public ResponseEntity<DadosDetalhamentoPaciente> detalhar(@PathVariable Long id) {
         var paciente = pacienteRepository.getReferenceById(id);
         return ResponseEntity.ok(new DadosDetalhamentoPaciente(paciente));
     }

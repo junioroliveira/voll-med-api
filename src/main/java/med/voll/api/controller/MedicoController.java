@@ -37,7 +37,7 @@ public class MedicoController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroMedico dados, UriComponentsBuilder uriBuilder){
+    public ResponseEntity<DadosDetalhamentoMedico> cadastrar(@RequestBody @Valid DadosCadastroMedico dados, UriComponentsBuilder uriBuilder){
         System.out.println(dados);
 
         var medico = medicoRepository.save(new Medico(dados));
@@ -55,7 +55,7 @@ public class MedicoController {
 
     @PutMapping
     @Transactional
-    public ResponseEntity alterar(@RequestBody @Valid DadosAtualizacaoMedico dados){
+    public ResponseEntity<DadosDetalhamentoMedico> alterar(@RequestBody @Valid DadosAtualizacaoMedico dados){
         var medico = medicoRepository.getReferenceById(dados.id());
         medico.atualizarInformacoes(dados);
         //medicoRepository.save(medico); //produz o mesmo resultado @Transactional
@@ -66,21 +66,21 @@ public class MedicoController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity excluir(@ModelAttribute DadosExcluirMedico dados){
+    public ResponseEntity<?> excluir(@ModelAttribute DadosExcluirMedico dados){
         medicoRepository.deleteById(dados.id());
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     @Transactional
-    public ResponseEntity desativar(@PathVariable Long id){
+    public ResponseEntity<DadosDetalhamentoMedico> desativar(@PathVariable Long id){
         var medico = medicoRepository.getReferenceById(id);
         medico.desativar();
         return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity detalhar(@PathVariable Long id){
+    public ResponseEntity<DadosDetalhamentoMedico> detalhar(@PathVariable Long id){
         var medico = medicoRepository.getReferenceById(id);
         return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
