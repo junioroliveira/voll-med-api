@@ -1,6 +1,6 @@
 package med.voll.api.paciente;
 
-import med.voll.endereco.Endereco;
+import med.voll.api.endereco.Endereco;
 
 public record DadosDetalhamentoPaciente(Long id, String nome, String email, String telefone, String cpf, Boolean ativo, Endereco endereco) {
     
