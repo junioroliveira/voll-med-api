@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import med.voll.api.security.TokenService;
 import med.voll.api.usuario.DadosAutenticacao;
+import med.voll.api.usuario.Usuario;
 
 @RestController
 @RequestMapping("/login")
@@ -19,13 +21,16 @@ public class AutenticacaoController {
     @Autowired
     private AuthenticationManager manager;
 
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping
     public ResponseEntity efeturaLogin(@RequestBody @Valid DadosAutenticacao dados){
 
         var token = new UsernamePasswordAuthenticationToken(dados.login(), dados.senha());
         var authentication = manager.authenticate(token);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(tokenService.gerarToken((Usuario) authentication.getPrincipal()));
 
     }
 
